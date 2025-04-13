@@ -1,0 +1,88 @@
+// app/graph/page.tsx
+"use client";
+
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { db } from "../../firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+  ChartData,
+} from "chart.js";
+
+ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+
+// Chart.js에서 Bar 차트를 위한 데이터 타입을 지정합니다.
+// 여기서 'bar' 차트의 데이터 타입으로 'number[]'를 사용하고, 레이블은 문자열로 지정합니다.
+type BarChartData = ChartData<"bar", number[], string>;
+
+export default function GraphPage() {
+  const searchParams = useSearchParams();
+  const docId = searchParams.get("docId");
+  // 초기 상태의 타입을 BarChartData | null 로 지정
+  const [chartData, setChartData] = useState<BarChartData | null>(null);
+
+  useEffect(() => {
+    if (docId) {
+      const fetchData = async () => {
+        try {
+          const docRef = doc(db, "surveyData", docId);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            // docSnap.data()의 타입을 명시적으로 지정 (여기서는 question1, question2가 number임)
+            const data = docSnap.data() as { question1: number; question2: number };
+            setChartData({
+              labels: ["질문 1", "질문 2"],
+              datasets: [
+                {
+                  label: "내가 선택한 점수",
+                  data: [data.question1, data.question2],
+                  backgroundColor: [
+                    "rgba(75, 192, 192, 0.6)",
+                    "rgba(54, 162, 235, 0.6)",
+                  ],
+                },
+              ],
+            });
+          } else {
+            console.log("문서를 찾을 수 없습니다.");
+          }
+        } catch (error) {
+          console.error("데이터 가져오기 에러: ", error);
+        }
+      };
+      fetchData();
+    }
+  }, [docId]);
+
+  if (!docId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl">제출된 설문 데이터가 없습니다.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-100 to-blue-100 p-4">
+      <div className="w-full max-w-4xl bg-white shadow-md rounded-xl p-8">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          설문조사 결과
+        </h1>
+        {chartData ? (
+          <div className="p-4">
+            <Bar data={chartData} />
+          </div>
+        ) : (
+          <p className="text-center text-gray-600">데이터를 불러오는 중입니다...</p>
+        )}
+      </div>
+    </div>
+  );
+}
