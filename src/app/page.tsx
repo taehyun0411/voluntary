@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "../firebase";
+import { db } from "@/firebase";
 import { collection, addDoc } from "firebase/firestore";
 
 interface FormValues {

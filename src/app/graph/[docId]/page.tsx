@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { db } from "../../../firebase";
+import { db } from "@/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { Bar } from "react-chartjs-2";
 import {
