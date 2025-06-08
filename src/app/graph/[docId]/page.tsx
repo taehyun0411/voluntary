@@ -16,9 +16,11 @@ import {
 } from "recharts";
 
 interface SurveyData {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
   name?: string;
   studentId?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createdAt?: any;
 }
 
